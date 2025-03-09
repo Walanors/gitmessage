@@ -6,6 +6,7 @@
   "engines": {
     "vscode": "^1.60.0"
   },
+  "icon": "resources/icon.png",
   "categories": [
     "Other"
   ],
@@ -18,10 +19,7 @@
       {
         "command": "gitmessage.generateCommitMessage",
         "title": "Generate Commit Message",
-        "icon": {
-          "light": "resources/light-icon.svg",
-          "dark": "resources/dark-icon.svg"
-        }
+        "icon": "resources/icon.svg"
       }
     ],
     "menus": {
@@ -78,10 +76,3 @@
   "author": "Walanors",
   "license": "MIT"
 }
-
-
-
-
-
-
-

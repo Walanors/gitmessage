@@ -1,6 +1,28 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M14 7.5C14 11.0899 11.0899 14 7.5 14C3.91015 14 1 11.0899 1 7.5C1 3.91015 3.91015 1 7.5 1C11.0899 1 14 3.91015 14 7.5Z" stroke="#C5C5C5" stroke-width="1.5"/>
-  <path d="M7.5 4.5V7.5L9.5 9.5" stroke="#C5C5C5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M15 15L11.5 11.5" stroke="#C5C5C5" stroke-width="1.5" stroke-linecap="round"/>
+<svg width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffcc00; stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff9900; stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <g stroke="url(#grad1)" stroke-width="6" fill="none">
+    <!-- Outer Circles -->
+    <circle cx="250" cy="250" r="180"/>
+    <circle cx="250" cy="250" r="220" stroke-dasharray="16,16"/>
+    
+    <!-- Cross Lines Stopping at Inner Circle -->
+    <path d="M100 250 L180 250" />
+    <path d="M320 250 L400 250" />
+    <path d="M250 100 L250 180" />
+    <path d="M250 320 L250 400" />
+    
+    <!-- Tech Arrow Shapes -->
+    <polygon points="250,30 275,110 225,110" fill="url(#grad1)"/>
+    <polygon points="250,470 275,390 225,390" fill="url(#grad1)"/>
+    <polygon points="30,250 110,275 110,225" fill="url(#grad1)"/>
+    <polygon points="470,250 390,275 390,225" fill="url(#grad1)"/>
+  </g>
+
+  <!-- Thicker Middle Empty Circle -->
+  <circle cx="250" cy="250" r="90" stroke="url(#grad1)" stroke-width="14" fill="none"/>
 </svg>
