@@ -1,0 +1,80 @@
+{
+  "name": "gitmessage",
+  "displayName": "Git Message Generator",
+  "description": "Instantly generate meaningful git commit messages using Mistral AI, based on your code changes",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:gitmessage.generateCommitMessage"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "gitmessage.generateCommitMessage",
+        "title": "Generate Commit Message",
+        "icon": {
+          "light": "resources/light-icon.svg",
+          "dark": "resources/dark-icon.svg"
+        }
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "gitmessage.generateCommitMessage",
+          "group": "navigation",
+          "when": "scmProvider == git"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Git Message Generator",
+      "properties": {
+        "gitmessage.mistralApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Mistral AI API Key"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.60.0",
+    "@types/glob": "^7.1.3",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "14.x",
+    "eslint": "^7.27.0",
+    "glob": "^7.1.7",
+    "mocha": "^8.4.0",
+    "typescript": "^4.3.2",
+    "vscode-test": "^1.5.2"
+  },
+  "dependencies": {
+    "axios": "^0.21.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/walanors/gitmessage.git"
+  },
+  "publisher": "Walanors",
+  "keywords": [
+    "git",
+    "commit",
+    "message",
+    "ai",
+    "mistral"
+  ],
+  "author": "Walanors",
+  "license": "MIT"
+}
