@@ -2,33 +2,25 @@ const vscode = require('vscode');
 const axios = require('axios');
 const { execSync } = require('child_process');
 
-// Create output channel for logging
 const outputChannel = vscode.window.createOutputChannel('Git Message Generator');
 
-/**
- * @param {vscode.ExtensionContext} context
- */
 function activate(context) {
     outputChannel.appendLine('Git Message Generator extension is now active');
     outputChannel.show();
     console.log('Git Message Generator extension is now active');
 
-    // Create status bar item for loading indicator
     const loadingStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
     loadingStatusBarItem.text = "$(sync~spin) Generating commit message...";
     context.subscriptions.push(loadingStatusBarItem);
 
-    // Register the command to generate commit message
     let disposable = vscode.commands.registerCommand('gitmessage.generateCommitMessage', async function () {
         outputChannel.appendLine('Generate commit message command triggered');
         outputChannel.show();
         
         try {
             console.log('Generate commit message command triggered');
-            // Show loading indicator
             loadingStatusBarItem.show();
             
-            // Get git diff to analyze changes
             const { diffOutput, changedFiles, newFiles } = await getGitDiff();
             if (!diffOutput && !newFiles.length) {
                 outputChannel.appendLine('No changes detected to generate commit message');
@@ -38,21 +30,17 @@ function activate(context) {
                 return;
             }
 
-            // Prepare a comprehensive summary of all changes
             let fullSummary = '';
             
             if (diffOutput) {
                 outputChannel.appendLine(`Git diff retrieved, length: ${diffOutput.length}`);
                 console.log('Git diff retrieved, length:', diffOutput.length);
                 
-                // Log the diff for debugging
                 console.log('FULL GIT DIFF:');
                 console.log(diffOutput);
                 
-                // Log the first 500 characters of the diff for debugging in output channel
                 outputChannel.appendLine(`Diff preview: ${diffOutput.substring(0, 500)}...`);
                 
-                // Count the number of files in the diff
                 const fileCount = (diffOutput.match(/^diff --git/gm) || []).length;
                 outputChannel.appendLine(`Number of modified files in diff: ${fileCount}`);
                 console.log(`Number of modified files in diff: ${fileCount}`);
@@ -60,7 +48,6 @@ function activate(context) {
                 fullSummary = diffOutput;
             }
             
-            // Add new files information
             if (newFiles.length > 0) {
                 outputChannel.appendLine(`Found ${newFiles.length} new files`);
                 console.log(`Found ${newFiles.length} new files:`, newFiles);
@@ -72,16 +59,13 @@ ${newFiles.map(file => `* ${file}`).join('\n')}
                 fullSummary = fullSummary ? `${fullSummary}\n\n${newFilesSummary}` : newFilesSummary;
             }
             
-            // Generate commit message using Mistral AI agent
             const commitMessage = await generateCommitMessageWithAI(fullSummary, changedFiles, newFiles);
             
-            // Hide loading indicator
             loadingStatusBarItem.hide();
             
             if (commitMessage) {
                 outputChannel.appendLine('Commit message generated successfully');
                 console.log('Commit message generated successfully');
-                // Find the Git extension's SCM input box
                 const gitExtension = vscode.extensions.getExtension('vscode.git');
                 if (gitExtension) {
                     outputChannel.appendLine('Git extension found');
@@ -101,7 +85,6 @@ ${newFiles.map(file => `* ${file}`).join('\n')}
                 } else {
                     outputChannel.appendLine('Git extension not found, trying generic SCM input box');
                     console.log('Git extension not found, trying generic SCM input box');
-                    // Fallback to generic SCM input box if Git extension not found
                     const scmInputBox = vscode.scm.inputBox;
                     if (scmInputBox) {
                         outputChannel.appendLine('SCM input box found');
@@ -119,7 +102,6 @@ ${newFiles.map(file => `* ${file}`).join('\n')}
                 console.error('Failed to generate commit message');
             }
         } catch (error) {
-            // Hide loading indicator on error
             loadingStatusBarItem.hide();
             outputChannel.appendLine(`Error in generateCommitMessage command: ${error.message}`);
             outputChannel.appendLine(`Stack trace: ${error.stack}`);
@@ -130,7 +112,6 @@ ${newFiles.map(file => `* ${file}`).join('\n')}
 
     context.subscriptions.push(disposable);
     
-    // Add a status bar item to test command activation
     const testItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
     testItem.text = "$(zap) Test Git Message";
     testItem.tooltip = "Test Git Message Generator";
@@ -141,10 +122,6 @@ ${newFiles.map(file => `* ${file}`).join('\n')}
     outputChannel.appendLine('Extension activation completed, command registered');
 }
 
-/**
- * Get the git diff of staged changes
- * @returns {Promise<{diffOutput: string, changedFiles: string[], newFiles: string[]}>} The git diff output and file lists
- */
 async function getGitDiff() {
     try {
         const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -160,15 +137,12 @@ async function getGitDiff() {
         console.log('Using workspace root path:', rootPath);
 
         try {
-            // Get a comprehensive diff that includes all changes
             let diffOutput = '';
             let changedFiles = [];
             let newFiles = [];
             
-            // Get all modified and new files using the suggested command
             outputChannel.appendLine('Getting all modified and new files...');
             try {
-                // Use the command suggested by the user to get all new and modified files
                 const allChangedFilesOutput = execSync('git ls-files . --exclude-standard --others -m', { cwd: rootPath }).toString().trim();
                 
                 if (allChangedFilesOutput) {
@@ -176,15 +150,11 @@ async function getGitDiff() {
                     outputChannel.appendLine(`Found ${allChangedFiles.length} total changed files`);
                     console.log(`Found ${allChangedFiles.length} total changed files`);
                     
-                    // Separate new files from modified files
                     for (const file of allChangedFiles) {
                         try {
-                            // Check if the file exists in the git index
                             execSync(`git ls-files --error-unmatch "${file}"`, { cwd: rootPath });
-                            // If we get here, the file exists in the index, so it's modified
                             changedFiles.push(file);
                         } catch (e) {
-                            // If we get an error, the file doesn't exist in the index, so it's new
                             newFiles.push(file);
                         }
                     }
@@ -197,10 +167,8 @@ async function getGitDiff() {
                     console.log('No changed files detected');
                 }
             } catch (e) {
-                outputChannel.appendLine(`Error getting changed files: ${e.message}`);
                 console.error('Error getting changed files:', e.message);
                 
-                // Fallback to separate commands for modified and new files
                 try {
                     const modifiedFilesOutput = execSync('git diff --name-only', { cwd: rootPath }).toString().trim();
                     if (modifiedFilesOutput) {
@@ -221,25 +189,20 @@ async function getGitDiff() {
                 }
             }
             
-            // Check for staged files first
             outputChannel.appendLine('Checking for staged files...');
             const stagedFiles = execSync('git diff --staged --name-only', { cwd: rootPath }).toString().trim();
             
             if (stagedFiles) {
                 outputChannel.appendLine(`Found ${stagedFiles.split('\n').length} staged files`);
                 console.log(`Found ${stagedFiles.split('\n').length} staged files: ${stagedFiles}`);
-                // Get detailed diff for staged files with file names and context
                 diffOutput = execSync('git diff --staged --patch', { cwd: rootPath, maxBuffer: 10 * 1024 * 1024 }).toString();
             } else if (changedFiles.length > 0) {
-                // If no staged files, check for modified files
                 outputChannel.appendLine('No staged files, checking modified files');
                 console.log('No staged files, checking modified files');
                 
-                // Get detailed diff for modified files with file names and context
                 diffOutput = execSync('git diff --patch', { cwd: rootPath, maxBuffer: 10 * 1024 * 1024 }).toString();
             }
             
-            // Log some stats about the diff
             if (diffOutput) {
                 const lineCount = diffOutput.split('\n').length;
                 const fileCount = (diffOutput.match(/^diff --git/gm) || []).length;
@@ -267,13 +230,6 @@ async function getGitDiff() {
     }
 }
 
-/**
- * Generate commit message using Mistral AI agent
- * @param {string} gitDiff The git diff to analyze
- * @param {string[]} changedFiles List of modified files
- * @param {string[]} newFiles List of new files
- * @returns {Promise<string>} The generated commit message
- */
 async function generateCommitMessageWithAI(gitDiff, changedFiles, newFiles) {
     try {
         const config = vscode.workspace.getConfiguration('gitmessage');
@@ -295,16 +251,13 @@ async function generateCommitMessageWithAI(gitDiff, changedFiles, newFiles) {
             return null;
         }
 
-        // Truncate git diff if it's too large - increase the limit to capture more changes
-        const maxDiffLength = 32000; // Increased from 10000 to capture more changes
+        const maxDiffLength = 32000; 
         const truncatedDiff = gitDiff.length > maxDiffLength
             ? gitDiff.substring(0, maxDiffLength) + '...(truncated)'
             : gitDiff;
 
-        // Add a clear instruction to the AI with specific guidance about new files
         let prompt = `Here is a summary of my changes. Please generate a concise, descriptive commit message that follows conventional commit format (type: description).`;
         
-        // Add specific instructions based on what we have
         if (changedFiles.length > 0 && newFiles.length > 0) {
             prompt += ` Include ALL significant changes to existing files, and mention that ${newFiles.length} new files were added without going into detail about each new file.`;
         } else if (changedFiles.length > 0) {
@@ -315,7 +268,6 @@ async function generateCommitMessageWithAI(gitDiff, changedFiles, newFiles) {
         
         prompt += `\n\n${truncatedDiff}`;
 
-        // Log the full prompt being sent to the API
         outputChannel.appendLine('===== FULL PROMPT BEING SENT TO MISTRAL AI =====');
         outputChannel.appendLine(prompt);
         outputChannel.appendLine('===== END OF PROMPT =====');
@@ -328,7 +280,6 @@ async function generateCommitMessageWithAI(gitDiff, changedFiles, newFiles) {
         outputChannel.appendLine(`Sending ${prompt.length} characters to Mistral AI`);
         console.log(`Sending ${prompt.length} characters to Mistral AI`);
         
-        // Call Mistral AI agent API directly
         try {
             const response = await axios({
                 method: 'post',
