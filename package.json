@@ -80,7 +80,7 @@
     "type": "git",
     "url": "https://github.com/walanors/gitmessage.git"
   },
-  "publisher": "Walanors",
+  "publisher": "Overglow",
   "keywords": [
     "git",
     "commit",
@@ -88,6 +88,6 @@
     "ai",
     "mistral"
   ],
-  "author": "Walanors",
+  "author": "Overglow",
   "license": "MIT"
 }
